@@ -20,7 +20,7 @@ public final class TicketsRepository: TicketsRepositoryProtocol {
 
 	private struct Resonse: Decodable {
 		let success: Bool
-		let data: [String: [String: TicketModel]]
+		let data: [String: [String: TicketDataModel]]
 
 		enum CodingKeys: String, CodingKey {
 			case success
@@ -30,7 +30,7 @@ public final class TicketsRepository: TicketsRepositoryProtocol {
 		init(from decoder: Decoder) throws {
 			let container = try decoder.container(keyedBy: CodingKeys.self)
 			success = try container.decode(Bool.self, forKey: .success)
-			data = try container.decode([String: [String: TicketModel]].self, forKey: .data)
+			data = try container.decode([String: [String: TicketDataModel]].self, forKey: .data)
 		}
 	}
 
@@ -68,7 +68,7 @@ public final class TicketsRepository: TicketsRepositoryProtocol {
 		let onComplete: (Result<NetworkResponse<Resonse>, Error>) -> Void = { result in
 			do {
 				let result = try result.get()
-				var models: [TicketModel] = []
+				var models: [TicketDataModel] = []
 				guard let response = result.data else {
 					return completion(.success([]))
 				}
@@ -78,7 +78,7 @@ public final class TicketsRepository: TicketsRepositoryProtocol {
 						models.append(model)
 					}
 				}
-				completion(.success(models))
+				completion(.success(models.map({ $0.ticketValue() })))
 			} catch {
 				completion(.failure(error))
 			}
